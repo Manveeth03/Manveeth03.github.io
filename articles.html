@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Articles Page</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Any additional custom styles if needed */
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-white">
+  <div id="app">
+    <!-- Header -->
+    <header class="border-b border-gray-200 bg-white">
+      <div class="max-w-6xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-bold text-gray-900">My Articles</h1>
+          <a href="\index.html" class="text-blue-600 hover:text-blue-500 transition-colors">
+            ← Back to Portfolio
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="max-w-6xl mx-auto px-6 py-16">
+      <div class="text-center mb-12">
+        <h2 class="text-5xl font-bold text-gray-900 mb-4">
+          Thoughts & <span class="text-transparent bg-clip-text bg-gradient-to-r from-gray-500 to-gray-700">Insights</span>
+        </h2>
+        <p class="text-xl text-gray-700 max-w-2xl mx-auto">
+          Exploring technology, development practices, and lessons learned along the way
+        </p>
+      </div>
+
+      <!-- Search and Filter -->
+      <div class="mb-12 space-y-6">
+        <!-- Search Bar -->
+        <div class="relative max-w-2xl mx-auto">
+          <lucide-icon name="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" size="20"></lucide-icon>
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search articles..."
+            class="w-full pl-12 pr-4 py-4 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <!-- Category Filter -->
+        <div id="category-filter" class="flex flex-wrap justify-center gap-3">
+          <!-- Categories will be populated here -->
+        </div>
+      </div>
+
+      <!-- Articles Grid -->
+      <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Articles will be populated here -->
+      </div>
+
+      <!-- No Results -->
+      <div id="no-results" class="text-center py-20 hidden">
+        <p class="text-gray-600 text-xl">No articles found matching your criteria.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 mt-20">
+      <div class="max-w-6xl mx-auto px-6 py-8">
+        <p class="text-center text-gray-500">
+          © 2025 Manveeth Handa. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Load Lucide icons
+    lucide.createIcons();
+
+    // Articles data
+    const articles = [
+      {
+        id: 1,
+        title: "Data Link Layer ",
+        excerpt: "The data link layer, or Layer 2, is the second layer in the seven-layer Open Systems Interconnection (OSI) model. It is responsible for node-to-node data transfer within the same local network segment. ",
+        // category: "Tutorial",
+        date: "2025-09-28",
+        readTime: "3 min read",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMzgKCnQb53uE_EWrSNRMhtEnElIC4PJR2WA&s",
+        link: "\data-link-layer.html"
+      },
+      {
+        id: 2,
+        title: "Applications of Graph Theory in Social Networks",
+        excerpt: "Graph theory studies graphs — mathematical structures made of vertices (nodes) and edges (links). In social networks, each person is a node and each relationship is an edge",
+        // category: "Opinion",
+        date: "2025-09-30",
+        readTime: "4 min read",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbSg-fT-15rHhn7fKdD8vh2G7dnoh2PaKJqA&s",
+        link: "\graph_theory_social_networks.html"
+      }
+    //   {
+    //     id: 3,
+    //     title: "Building Scalable APIs with Node.js",
+    //     excerpt: "Best practices for creating robust and scalable RESTful APIs using Node.js and Express framework.",
+    //     category: "Tutorial",
+    //     date: "2024-08-28",
+    //     readTime: "10 min read",
+    //     image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
+    //     link: "#"
+    //   },
+    //   {
+    //     id: 4,
+    //     title: "CSS Grid vs Flexbox: When to Use What",
+    //     excerpt: "Understanding the differences between CSS Grid and Flexbox, and choosing the right layout system for your project.",
+    //     category: "Guide",
+    //     date: "2024-08-20",
+    //     readTime: "7 min read",
+    //     image: "https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800&q=80",
+    //     link: "#"
+    //   },
+    //   {
+    //     id: 5,
+    //     title: "My Journey into Tech",
+    //     excerpt: "A personal story about transitioning into software development and the lessons learned along the way.",
+    //     category: "Personal",
+    //     date: "2024-08-05",
+    //     readTime: "5 min read",
+    //     image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80",
+    //     link: "#"
+    //   },
+    //   {
+    //     id: 6,
+    //     title: "Understanding TypeScript Generics",
+    //     excerpt: "Deep dive into TypeScript generics and how they can make your code more reusable and type-safe.",
+    //     category: "Tutorial",
+    //     date: "2024-07-22",
+    //     readTime: "9 min read",
+    //     image: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80",
+    //     link: "#"
+    //   }
+    ];
+
+    // Generate categories
+    const categories = ['All', ...new Set(articles.map(article => article.category))];
+
+    // State variables
+    let searchTerm = '';
+    let selectedCategory = 'All';
+
+    // Elements
+    const searchInput = document.getElementById('search-input');
+    const categoryFilter = document.getElementById('category-filter');
+    const articlesGrid = document.getElementById('articles-grid');
+    const noResults = document.getElementById('no-results');
+
+    // Function to render categories
+    function renderCategories() {
+      categories.forEach(category => {
+        const button = document.createElement('button');
+        button.textContent = category;
+        button.onclick = () => {
+          selectedCategory = category;
+          updateButtons();
+          renderArticles();
+        };
+        categoryFilter.appendChild(button);
+      });
+      updateButtons();
+    }
+
+    // Update button styles
+    function updateButtons() {
+      const buttons = categoryFilter.querySelectorAll('button');
+      buttons.forEach(button => {
+        if (button.textContent === selectedCategory) {
+          button.className = 'px-6 py-2 rounded-full font-medium transition-all bg-gray-300 text-gray-900 shadow-lg shadow-gray-300/50';
+        } else {
+          button.className = 'px-6 py-2 rounded-full font-medium transition-all bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300';
+        }
+      });
+    }
+
+    // Function to filter and render articles
+    function renderArticles() {
+      const filteredArticles = articles.filter(article => {
+        const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              article.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'All' || article.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+      });
+
+      articlesGrid.innerHTML = '';
+      if (filteredArticles.length === 0) {
+        noResults.classList.remove('hidden');
+      } else {
+        noResults.classList.add('hidden');
+        filteredArticles.forEach(article => {
+          const articleElement = document.createElement('article');
+          articleElement.className = 'group bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 transition-all duration-300 hover:transform hover:-translate-y-2';
+
+          const imageDiv = document.createElement('div');
+          imageDiv.className = 'relative h-48 overflow-hidden';
+          const img = document.createElement('img');
+          img.src = article.image;
+          img.alt = article.title;
+          img.className = 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-300';
+          const badge = document.createElement('div');
+          badge.className = 'absolute top-4 right-4';
+          const span = document.createElement('span');
+          span.className = 'px-3 py-1 bg-gray-300 text-gray-900 text-xs font-semibold rounded-full';
+          span.textContent = article.category;
+          badge.appendChild(span);
+          imageDiv.appendChild(img);
+          imageDiv.appendChild(badge);
+
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'p-6';
+
+          const h3 = document.createElement('h3');
+          h3.className = 'text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors';
+          h3.textContent = article.title;
+
+          const p = document.createElement('p');
+          p.className = 'text-gray-600 mb-4 line-clamp-3';
+          p.textContent = article.excerpt;
+
+          const metaDiv = document.createElement('div');
+          metaDiv.className = 'flex items-center justify-between text-sm text-gray-500 mb-4';
+
+          const dateDiv = document.createElement('div');
+          dateDiv.className = 'flex items-center gap-2';
+          dateDiv.innerHTML = `<lucide-icon name="calendar" size="14"></lucide-icon><span>${new Date(article.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>`;
+
+          const timeDiv = document.createElement('div');
+          timeDiv.className = 'flex items-center gap-2';
+          timeDiv.innerHTML = `<lucide-icon name="clock" size="14"></lucide-icon><span>${article.readTime}</span>`;
+
+          metaDiv.appendChild(dateDiv);
+          metaDiv.appendChild(timeDiv);
+
+          const linkA = document.createElement('a');
+          linkA.href = article.link;
+          linkA.className = 'inline-flex items-center gap-2 text-blue-600 hover:text-blue-500 font-medium transition-colors';
+          linkA.innerHTML = `Read Article <lucide-icon name="external-link" size="16"></lucide-icon>`;
+
+          contentDiv.appendChild(h3);
+          contentDiv.appendChild(p);
+          contentDiv.appendChild(metaDiv);
+          contentDiv.appendChild(linkA);
+
+          articleElement.appendChild(imageDiv);
+          articleElement.appendChild(contentDiv);
+
+          articlesGrid.appendChild(articleElement);
+        });
+      }
+      // Re-create icons after rendering
+      lucide.createIcons();
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', (e) => {
+      searchTerm = e.target.value;
+      renderArticles();
+    });
+
+    // Initial render
+    renderCategories();
+    renderArticles();
+  </script>
+</body>
+</html>
