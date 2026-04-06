@@ -273,16 +273,12 @@
     //   }
     ];
 
-    // Generate categories
-    const categories = ['All', ...new Set(articles.map(article => article.category))];
 
     // State variables
     let searchTerm = '';
-    let selectedCategory = 'All';
 
     // Elements
     const searchInput = document.getElementById('search-input');
-    const categoryFilter = document.getElementById('category-filter');
     const articlesGrid = document.getElementById('articles-grid');
     const noResults = document.getElementById('no-results');
 
@@ -324,7 +320,7 @@
       });
 
       articlesGrid.innerHTML = '';
-      articles.forEach(article => {
+      filteredArticles.forEach(article => {
           const articleElement = document.createElement('article');
           articleElement.className = 'group bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 transition-all duration-300 hover:transform hover:-translate-y-2';
 
@@ -334,10 +330,6 @@
           img.src = article.image;
           img.alt = article.title;
           img.className = 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-300';
-          const span = document.createElement('span');
-          span.className = 'px-3 py-1 bg-gray-300 text-gray-900 text-xs font-semibold rounded-full';
-          span.textContent = article.category;
-          badge.appendChild(span);
           imageDiv.appendChild(img);
 
           const contentDiv = document.createElement('div');
