@@ -286,48 +286,45 @@
     const articlesGrid = document.getElementById('articles-grid');
     const noResults = document.getElementById('no-results');
 
-    // Function to render categories
-    function renderCategories() {
-      categories.forEach(category => {
-        const button = document.createElement('button');
-        button.textContent = category;
-        button.onclick = () => {
-          selectedCategory = category;
-          updateButtons();
-          renderArticles();
-        };
-        categoryFilter.appendChild(button);
-      });
-      updateButtons();
-    }
+    // Function to render articles
+    renderArticles();
+    
+    // function renderCategories() {
+    //   categories.forEach(category => {
+    //     const button = document.createElement('button');
+    //     button.textContent = category;
+    //     button.onclick = () => {
+    //       selectedCategory = category;
+    //       updateButtons();
+    //       renderArticles();
+    //     };
+    //     categoryFilter.appendChild(button);
+    //   });
+    //   updateButtons();
+    // }
 
     // Update button styles
-    function updateButtons() {
-      const buttons = categoryFilter.querySelectorAll('button');
-      buttons.forEach(button => {
-        if (button.textContent === selectedCategory) {
-          button.className = 'px-6 py-2 rounded-full font-medium transition-all bg-gray-300 text-gray-900 shadow-lg shadow-gray-300/50';
-        } else {
-          button.className = 'px-6 py-2 rounded-full font-medium transition-all bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300';
-        }
-      });
-    }
+    // function updateButtons() {
+    //   const buttons = categoryFilter.querySelectorAll('button');
+    //   buttons.forEach(button => {
+    //     if (button.textContent === selectedCategory) {
+    //       button.className = 'px-6 py-2 rounded-full font-medium transition-all bg-gray-300 text-gray-900 shadow-lg shadow-gray-300/50';
+    //     } else {
+    //       button.className = 'px-6 py-2 rounded-full font-medium transition-all bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300';
+    //     }
+    //   });
+    // }
 
     // Function to filter and render articles
     function renderArticles() {
       const filteredArticles = articles.filter(article => {
         const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                               article.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = selectedCategory === 'All' || article.category === selectedCategory;
-        return matchesSearch && matchesCategory;
+        return matchesSearch;
       });
 
       articlesGrid.innerHTML = '';
-      if (filteredArticles.length === 0) {
-        noResults.classList.remove('hidden');
-      } else {
-        noResults.classList.add('hidden');
-        filteredArticles.forEach(article => {
+      filteredArticles.forEach(article => {
           const articleElement = document.createElement('article');
           articleElement.className = 'group bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 transition-all duration-300 hover:transform hover:-translate-y-2';
 
@@ -383,7 +380,68 @@
 
           articlesGrid.appendChild(articleElement);
         });
-      }
+      
+      // if (filteredArticles.length === 0) {
+      //   noResults.classList.remove('hidden');
+      // } else {
+      //   noResults.classList.add('hidden');
+      //   filteredArticles.forEach(article => {
+      //     const articleElement = document.createElement('article');
+      //     articleElement.className = 'group bg-gray-50 border border-gray-200 rounded-2xl overflow-hidden hover:border-gray-400 transition-all duration-300 hover:transform hover:-translate-y-2';
+
+      //     const imageDiv = document.createElement('div');
+      //     imageDiv.className = 'relative h-48 overflow-hidden';
+      //     const img = document.createElement('img');
+      //     img.src = article.image;
+      //     img.alt = article.title;
+      //     img.className = 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-300';
+      //     const span = document.createElement('span');
+      //     span.className = 'px-3 py-1 bg-gray-300 text-gray-900 text-xs font-semibold rounded-full';
+      //     span.textContent = article.category;
+      //     badge.appendChild(span);
+      //     imageDiv.appendChild(img);
+
+      //     const contentDiv = document.createElement('div');
+      //     contentDiv.className = 'p-6';
+
+      //     const h3 = document.createElement('h3');
+      //     h3.className = 'text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors';
+      //     h3.textContent = article.title;
+
+      //     const p = document.createElement('p');
+      //     p.className = 'text-gray-600 mb-4 line-clamp-3';
+      //     p.textContent = article.excerpt;
+
+      //     const metaDiv = document.createElement('div');
+      //     metaDiv.className = 'flex items-center justify-between text-sm text-gray-500 mb-4';
+
+      //     const dateDiv = document.createElement('div');
+      //     dateDiv.className = 'flex items-center gap-2';
+      //     dateDiv.innerHTML = `<lucide-icon name="calendar" size="14"></lucide-icon><span>${new Date(article.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>`;
+
+      //     const timeDiv = document.createElement('div');
+      //     timeDiv.className = 'flex items-center gap-2';
+      //     timeDiv.innerHTML = `<lucide-icon name="clock" size="14"></lucide-icon><span>${article.readTime}</span>`;
+
+      //     metaDiv.appendChild(dateDiv);
+      //     metaDiv.appendChild(timeDiv);
+
+      //     const linkA = document.createElement('a');
+      //     linkA.href = article.link;
+      //     linkA.className = 'inline-flex items-center gap-2 text-blue-600 hover:text-blue-500 font-medium transition-colors';
+      //     linkA.innerHTML = `Read Article <lucide-icon name="external-link" size="16"></lucide-icon>`;
+
+      //     contentDiv.appendChild(h3);
+      //     contentDiv.appendChild(p);
+      //     contentDiv.appendChild(metaDiv);
+      //     contentDiv.appendChild(linkA);
+
+      //     articleElement.appendChild(imageDiv);
+      //     articleElement.appendChild(contentDiv);
+
+      //     articlesGrid.appendChild(articleElement);
+      //   });
+      // }
       // Re-create icons after rendering
       lucide.createIcons();
     }
