@@ -55,11 +55,6 @@
             class="w-full pl-12 pr-4 py-4 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
-
-        <!-- Category Filter -->
-        <div id="category-filter" class="flex flex-wrap justify-center gap-3">
-          <!-- Categories will be populated here -->
-        </div>
       </div>
 
       <!-- Articles Grid -->
@@ -342,14 +337,11 @@
           img.src = article.image;
           img.alt = article.title;
           img.className = 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-300';
-          const badge = document.createElement('div');
-          badge.className = 'absolute top-4 right-4';
           const span = document.createElement('span');
           span.className = 'px-3 py-1 bg-gray-300 text-gray-900 text-xs font-semibold rounded-full';
           span.textContent = article.category;
           badge.appendChild(span);
           imageDiv.appendChild(img);
-          imageDiv.appendChild(badge);
 
           const contentDiv = document.createElement('div');
           contentDiv.className = 'p-6';
