@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instruction Pipelining: How Modern CPUs Do More with Less</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f5f4f0; font-family: 'DM Sans', sans-serif; color: #1a1a18; min-height: 100vh; padding: 2rem 1rem; }
+  .page { max-width: 780px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 32px rgba(0,0,0,0.08); }
+
+  /* Header Banner */
+  .banner { background: #0f1b2d; padding: 2.5rem 2.5rem 2rem; }
+  .banner .tag { display: inline-block; background: rgba(255,255,255,0.1); color: #a8c4e0; font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; border: 0.5px solid rgba(255,255,255,0.15); margin-bottom: 1.2rem; }
+  .banner h1 { font-family: 'Lora', serif; font-size: clamp(1.6rem, 4vw, 2.3rem); font-weight: 600; line-height: 1.22; color: #ffffff; margin-bottom: .8rem; }
+  .banner .subtitle { font-size: 1rem; color: #8eaac4; line-height: 1.65; font-weight: 300; margin-bottom: 1.8rem; }
+  .meta-bar { display: flex; align-items: center; gap: 12px; }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; background: #1a3a5c; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 13px; color: #a8c4e0; flex-shrink: 0; border: 1.5px solid rgba(168,196,224,0.3); }
+  .meta-info strong { display: block; font-size: 14px; font-weight: 500; color: #e8f0f8; }
+  .meta-info span { font-size: 12px; color: #6a8faa; }
+
+  /* Body */
+  .body { padding: 2.5rem 2.5rem 3rem; }
+  .article-body { font-size: 15.5px; line-height: 1.82; color: #2c2c2a; }
+  .article-body p { margin-bottom: 1.25rem; }
+  .article-body strong { font-weight: 500; }
+  .article-body em { font-style: italic; }
+  .article-body h2 { font-family: 'Lora', serif; font-size: 1.3rem; font-weight: 600; margin: 2.2rem 0 .7rem; color: #0f1b2d; }
+  .article-body h3 { font-size: 11px; font-weight: 500; margin: 1.6rem 0 .5rem; color: #888780; text-transform: uppercase; letter-spacing: .08em; }
+
+  /* Pipeline diagram */
+  .pipeline-diagram { margin: 1.8rem 0; padding: 1.2rem 1.4rem; background: #f5f4f0; border-radius: 12px; border: 0.5px solid #d3d1c7; overflow-x: auto; }
+  .pipeline-diagram .label { font-size: 11px; color: #888780; margin-bottom: .9rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+  .stages { display: flex; align-items: center; gap: 5px; min-width: 500px; }
+  .stage { flex: 1; text-align: center; padding: 11px 6px; border-radius: 8px; font-size: 12px; font-weight: 500; line-height: 1.35; }
+  .stage span { font-weight: 400; font-size: 11px; display: block; margin-top: 2px; }
+  .s1 { background: #E6F1FB; color: #0C447C; }
+  .s2 { background: #EAF3DE; color: #27500A; }
+  .s3 { background: #FAEEDA; color: #633806; }
+  .s4 { background: #FBEAF0; color: #72243E; }
+  .s5 { background: #EEEDFE; color: #3C3489; }
+  .arrow { color: #b4b2a9; font-size: 18px; flex-shrink: 0; }
+
+  /* Metrics */
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.8rem 0; }
+  .metric { background: #f5f4f0; border-radius: 10px; padding: 1rem; text-align: center; border: 0.5px solid #d3d1c7; }
+  .metric .num { font-size: 1.7rem; font-weight: 500; color: #0f1b2d; line-height: 1; }
+  .metric .desc { font-size: 11.5px; color: #888780; margin-top: 5px; line-height: 1.4; }
+
+  /* Pull quote */
+  .pull-quote { border-left: 3px solid #378ADD; margin: 2rem 0; padding: .9rem 1.3rem; background: #f0f6fd; border-radius: 0 10px 10px 0; }
+  .pull-quote p { font-family: 'Lora', serif; font-style: italic; font-size: 1.05rem; color: #0f1b2d; margin: 0; line-height: 1.65; }
+
+  /* Divider */
+  .divider { height: 0.5px; background: #d3d1c7; margin: 2rem 0; }
+
+  /* Footer */
+  .article-footer { font-size: 13px; color: #888780; margin-bottom: 1.5rem; line-height: 1.6; }
+  .footer-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .footer-tags span { background: #f5f4f0; color: #5f5e5a; font-size: 12px; padding: 5px 13px; border-radius: 20px; border: 0.5px solid #d3d1c7; }
+
+  @media (max-width: 540px) {
+    .banner, .body { padding-left: 1.2rem; padding-right: 1.2rem; }
+    .metrics { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="banner">
+    <span class="tag">Computer Architecture · M&amp;CA SLA</span>
+    <h1>Instruction Pipelining: How Modern CPUs Do More with Less</h1>
+    <p class="subtitle">A deep dive into one of the most transformative ideas in processor design — breaking instructions apart to run them all at once.</p>
+    <div class="meta-bar">
+      <div class="avatar">YOU</div>
+      <div class="meta-info">
+        <strong>Student Article — M&amp;CA Self-Learning Activity</strong>
+        <span>Microprocessors &amp; Computer Architecture · Stage 1 · April 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Article Body -->
+  <div class="body">
+    <div class="article-body">
+
+      <p>Imagine a car factory where a single worker builds an entire vehicle from scratch before starting the next one. Now imagine splitting that work across an assembly line — one station welds the frame, another installs the engine, another fits the interior, all simultaneously. The factory produces a car at the end of every shift instead of once every few days. This is precisely the intuition behind <strong>instruction pipelining</strong> in modern microprocessors.</p>
+
+      <h2>What is instruction pipelining?</h2>
+      <p>In a non-pipelined processor, executing a single instruction involves multiple sequential steps: fetching the instruction from memory, decoding it to understand what it means, reading the required operands, performing the actual computation, and finally writing the result back. In early CPUs, all five stages had to complete before the next instruction could even begin.</p>
+      <p>Pipelining breaks this sequential wall. By dividing instruction execution into distinct stages, the processor can work on several instructions at the same time — each one at a different stage of its journey.</p>
+
+      <div class="pipeline-diagram">
+        <p class="label">Classic 5-stage RISC pipeline</p>
+        <div class="stages">
+          <div class="stage s1">IF<span>Instruction Fetch</span></div>
+          <div class="arrow">›</div>
+          <div class="stage s2">ID<span>Instruction Decode</span></div>
+          <div class="arrow">›</div>
+          <div class="stage s3">EX<span>Execute</span></div>
+          <div class="arrow">›</div>
+          <div class="stage s4">MEM<span>Memory Access</span></div>
+          <div class="arrow">›</div>
+          <div class="stage s5">WB<span>Write Back</span></div>
+        </div>
+      </div>
+
+      <p>In a 5-stage pipeline, once the processor is full, it can theoretically complete one instruction every clock cycle — even though each instruction still takes five cycles end-to-end. The throughput improvement is dramatic.</p>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="num">5×</div>
+          <div class="desc">Theoretical throughput gain over non-pipelined design</div>
+        </div>
+        <div class="metric">
+          <div class="num">~20</div>
+          <div class="desc">Stages in Intel's Pentium 4 NetBurst pipeline</div>
+        </div>
+        <div class="metric">
+          <div class="num">1 GHz+</div>
+          <div class="desc">Clock speeds made practical by deep pipelining in the 2000s</div>
+        </div>
+      </div>
+
+      <h2>Hazards: when the pipeline stalls</h2>
+      <p>Pipelining sounds perfect on paper, but real programs create situations where the neat assembly-line breaks down. These are called <em>hazards</em>.</p>
+
+      <h3>Three kinds of hazards</h3>
+      <p><strong>Structural hazards</strong> occur when two instructions need the same hardware resource at the same time — for example, both needing to access memory simultaneously. Designers solve this by duplicating hardware or carefully scheduling resources.</p>
+      <p><strong>Data hazards</strong> arise when an instruction needs the result of the previous instruction, which hasn't finished yet. The processor must either stall (insert empty "bubble" cycles) or use a technique called <em>forwarding</em>, where the result is passed directly from one stage's output to another's input without waiting for a write-back.</p>
+      <p><strong>Control hazards</strong> are perhaps the trickiest. When the processor encounters a branch instruction (like an if/else), it doesn't yet know which path to follow, but it has already started fetching subsequent instructions. Getting it wrong means discarding several cycles of work — a painful flush of the pipeline.</p>
+
+      <div class="pull-quote">
+        <p>"The deeper the pipeline, the faster the clock — but also the heavier the penalty when something goes wrong. This tension defines much of modern CPU design."</p>
+      </div>
+
+      <h2>Branch prediction: the art of educated guessing</h2>
+      <p>Modern processors tackle control hazards with sophisticated branch predictors — circuits that guess which way a branch will go before the condition is evaluated. A well-trained predictor can achieve over 95% accuracy on real workloads. When it guesses correctly, execution continues without interruption. When it guesses wrong, the wrongly-fetched instructions are discarded and the pipeline restarts from the correct address — a process called a <em>branch misprediction penalty</em>.</p>
+      <p>The infamous Spectre and Meltdown vulnerabilities discovered in 2018 were rooted in this very mechanism, revealing that speculative execution can expose memory contents across security boundaries. Pipelining and prediction, it turns out, carry security implications alongside their performance benefits.</p>
+
+      <h2>Superscalar and out-of-order execution</h2>
+      <p>Modern high-performance CPUs go even further. A <strong>superscalar</strong> processor has multiple pipelines running in parallel, issuing two, four, or even eight instructions per clock cycle. Combined with <strong>out-of-order execution</strong> — where the processor dynamically reorders instructions to avoid stalls — today's processors can keep dozens of instructions in flight simultaneously.</p>
+      <p>Apple's M-series chips, for example, can issue up to eight instructions per cycle, backed by a reorder buffer hundreds of entries deep. ARM's Cortex-X cores and AMD's Zen architecture use similar techniques to extract every possible cycle from the silicon.</p>
+
+      <h2>Why it still matters</h2>
+      <p>Pipelining is not just a historical curiosity — it is the foundational technique that made the GHz era possible and continues to shape every processor shipped today. Understanding it gives engineers insight into why certain code patterns are faster than others, why compilers reorder instructions, and why branch-heavy code can be a performance bottleneck.</p>
+      <p>For software developers, this understanding translates into writing cache-friendly, branch-predictable code. For hardware designers, it means balancing pipeline depth, width, and the cost of hazards. The assembly line that transformed manufacturing in the 20th century transformed computing in the same way — and the optimization is still ongoing.</p>
+
+      <div class="divider"></div>
+      <p class="article-footer">Written as part of the M&amp;CA Self-Learning Activity (Stage 1 · Article Writing). References: Patterson &amp; Hennessy, <em>Computer Organization and Design</em>; Saylor Academy — Computer Architecture.</p>
+
+      <div class="footer-tags">
+        <span>#ComputerArchitecture</span>
+        <span>#Microprocessors</span>
+        <span>#Pipelining</span>
+        <span>#CPUDesign</span>
+        <span>#SelfLearning</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
