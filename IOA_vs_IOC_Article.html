@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IOA vs IOC — Two Ways Defenders Catch Attackers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E1116;
+    --bg-raised: #151A21;
+    --hairline: #262E38;
+    --text: #E6E9ED;
+    --text-dim: #9AA4B1;
+    --ioc: #6FA3C7;      /* cool steel blue — evidence, forensic */
+    --ioc-dim: #2A3B47;
+    --ioa: #E2963C;      /* warm amber — behavior, motion */
+    --ioa-dim: #4A3620;
+    --paper: #E6E9ED;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection{ background: var(--ioa); color: #0E1116; }
+
+  .wrap{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px 120px;
+  }
+
+  /* ---------- Lens toggle bar ---------- */
+  .lensbar{
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(14,17,22,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .lensbar-inner{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .lens-label{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+  .lens-btn{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    background: transparent;
+    border: 1px solid var(--hairline);
+    color: var(--text-dim);
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .lens-btn:hover{ border-color: var(--text-dim); color: var(--text); }
+  .lens-btn:focus-visible{ outline: 2px solid var(--text); outline-offset: 2px; }
+  .lens-btn.ioc.active{ background: var(--ioc-dim); border-color: var(--ioc); color: var(--ioc); }
+  .lens-btn.ioa.active{ background: var(--ioa-dim); border-color: var(--ioa); color: var(--ioa); }
+
+  /* ---------- Hero ---------- */
+  .hero{ padding: 72px 0 40px; }
+  .eyebrow{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 18px;
+  }
+  h1{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.1rem, 6vw, 3.4rem);
+    line-height: 1.05;
+    margin: 0 0 20px;
+    letter-spacing: -0.01em;
+  }
+  h1 .split{ display:inline-block; }
+  h1 .ioc-word{ color: var(--ioc); }
+  h1 .ioa-word{ color: var(--ioa); }
+  .dividerchar{ color: var(--text-dim); font-weight: 400; }
+
+  .subhead{
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    max-width: 58ch;
+    margin: 0 0 36px;
+  }
+
+  .dichotomy{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .dcell{
+    padding: 22px 20px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .dcell.ioc{ background: var(--ioc-dim); border-right: 1px solid var(--hairline); }
+  .dcell.ioa{ background: var(--ioa-dim); }
+  .dcell .tag{ font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .dcell.ioc .tag{ color: var(--ioc); }
+  .dcell.ioa .tag{ color: var(--ioa); }
+  .dcell .line{ font-size: 15px; color: var(--text); margin-top: 8px; line-height: 1.5; }
+
+  /* ---------- Body typography ---------- */
+  p{ margin: 0 0 22px; font-size: 1.05rem; color: var(--text); }
+
+  h2{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 56px 0 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  h2 .num{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  section.card{
+    border-left: 3px solid var(--hairline);
+    padding-left: 22px;
+    margin-bottom: 8px;
+  }
+  section.card.ioc{ border-left-color: var(--ioc); }
+  section.card.ioa{ border-left-color: var(--ioa); }
+
+  ul.exlist{
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  ul.exlist li{
+    font-size: 0.98rem;
+    color: var(--text);
+    padding: 10px 14px;
+    background: var(--bg-raised);
+    border-radius: 6px;
+    border: 1px solid var(--hairline);
+    font-family: 'Source Serif 4', serif;
+  }
+  ul.exlist li::before{
+    content: "›";
+    margin-right: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  section.card.ioc ul.exlist li::before{ color: var(--ioc); }
+  section.card.ioa ul.exlist li::before{ color: var(--ioa); }
+
+  .callout{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+    background: var(--bg-raised);
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin: 0 0 24px;
+  }
+  .callout b{ color: var(--text); font-weight: 600; }
+
+  blockquote{
+    margin: 40px 0;
+    padding: 24px 26px;
+    background: var(--bg-raised);
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    font-style: italic;
+    font-size: 1.08rem;
+    color: var(--text);
+    position: relative;
+  }
+  blockquote .attribution{
+    display:block;
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .pillars{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 24px 0 32px;
+  }
+  .pillar{
+    border: 1px solid var(--hairline);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .pillar .k{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .pillar .v{ font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 1rem; }
+
+  .takeaway{
+    margin-top: 60px;
+    padding: 30px 26px;
+    border-radius: 12px;
+    background: linear-gradient(120deg, var(--ioc-dim), var(--ioa-dim));
+    border: 1px solid var(--hairline);
+  }
+  .takeaway .eyebrow{ color: var(--paper); opacity: 0.65; }
+  .takeaway p{ font-size: 1.1rem; margin-bottom: 0; }
+  .takeaway .ioc-word{ color: var(--ioc); font-weight: 600; font-style: normal; }
+  .takeaway .ioa-word{ color: var(--ioa); font-weight: 600; font-style: normal; }
+
+  footer{
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--hairline);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- Lens highlight states ---------- */
+  body.lens-ioc [data-tag="ioc"]{ background: var(--ioc-dim); color: var(--ioc); padding: 0 3px; border-radius: 3px; }
+  body.lens-ioa [data-tag="ioa"]{ background: var(--ioa-dim); color: var(--ioa); padding: 0 3px; border-radius: 3px; }
+  body.lens-ioc p, body.lens-ioa p{ transition: opacity 0.2s ease; }
+  body.lens-ioc .no-ioc, body.lens-ioa .no-ioa{ opacity: 0.55; }
+
+  @media (max-width: 560px){
+    .dichotomy{ grid-template-columns: 1fr; }
+    .dcell.ioc{ border-right: none; border-bottom: 1px solid var(--hairline); }
+    .pillars{ grid-template-columns: 1fr; }
+    .hero{ padding-top: 48px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="lensbar">
+    <div class="lensbar-inner">
+      <span class="lens-label">Detection lens</span>
+      <button class="lens-btn ioc" id="btn-ioc" aria-pressed="false">Highlight IOC</button>
+      <button class="lens-btn ioa" id="btn-ioa" aria-pressed="false">Highlight IOA</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <div class="hero">
+      <div class="eyebrow">Cybersecurity Essentials — Self-Learning Article</div>
+      <h1><span class="split ioc-word">IOA</span> <span class="dividerchar">vs</span> <span class="split ioa-word">IOC</span></h1>
+      <p class="subhead">Two different ways cybersecurity teams catch attackers — one reads the evidence left behind, the other reads the intent unfolding in real time.</p>
+
+      <div class="dichotomy">
+        <div class="dcell ioc">
+          <div class="tag">Indicator of Compromise</div>
+          <div class="line">Confirms an attack <em>already happened</em></div>
+        </div>
+        <div class="dcell ioa">
+          <div class="tag">Indicator of Attack</div>
+          <div class="line">Reveals an attack <em>happening now</em></div>
+        </div>
+      </div>
+    </div>
+
+    <p>When a security team investigates a breach, two terms come up constantly: <b data-tag="ioc">Indicators of Compromise (IOC)</b> and <b data-tag="ioa">Indicators of Attack (IOA)</b>. They sound similar, but they represent two fundamentally different philosophies of detection — one looks backward at evidence an attack already happened, the other looks forward at behavior suggesting an attack is happening right now. Understanding the difference is one of the most practical skills a cybersecurity learner can build, because it shapes how real organizations design their defenses.</p>
+
+    <section class="card ioc">
+      <h2><span class="num">01</span> What Is an Indicator of Compromise (<span data-tag="ioc">IOC</span>)?</h2>
+      <p>An <b data-tag="ioc">IOC</b> is a piece of forensic evidence left behind after a system has already been breached. It answers the question: <em>"What happened here?"</em></p>
+      <p>Common examples of <span data-tag="ioc">IOCs</span> include:</p>
+      <ul class="exlist">
+        <li>A known-malicious file hash</li>
+        <li>A suspicious IP address or domain contacting the network</li>
+        <li>Unusual outbound traffic to a foreign server</li>
+        <li>A registry key or file that malware is known to create</li>
+        <li>Unexpected privileged-account logins at odd hours</li>
+      </ul>
+      <p><span data-tag="ioc">IOCs</span> are essentially digital fingerprints. Security tools such as antivirus software, SIEM (Security Information and Event Management) platforms, and threat intelligence feeds compare data against large <span data-tag="ioc">IOC</span> databases to flag matches. If a file's hash matches a known ransomware sample, that's an <span data-tag="ioc">IOC</span> hit.</p>
+      <div class="callout"><b>The limitation:</b> IOCs are reactive. They only work if the attack has already been seen somewhere before and someone has catalogued its fingerprint. A brand-new technique — or one that avoids leaving the "usual" traces — can slip past IOC-based detection entirely.</div>
+    </section>
+
+    <section class="card ioa">
+      <h2><span class="num">02</span> What Is an Indicator of Attack (<span data-tag="ioa">IOA</span>)?</h2>
+      <p>An <b data-tag="ioa">IOA</b> focuses not on artifacts left behind, but on the sequence of actions and intent behind an attack while it is unfolding. It answers a different question: <em>"What is this process trying to do?"</em></p>
+      <p>Examples of <span data-tag="ioa">IOA</span>-style behavior include:</p>
+      <ul class="exlist">
+        <li>A Word document spawning a command-line process</li>
+        <li>An application suddenly accessing credential storage</li>
+        <li>An account rapidly enumerating servers it has never touched</li>
+        <li>A process trying to disable security logging</li>
+        <li>Lateral movement across a network within a short time window</li>
+      </ul>
+      <p><span data-tag="ioa">IOAs</span> describe <em>tactics, techniques, and procedures</em> (TTPs) — the "how" of an attack — rather than a static signature. Because attackers often reuse strategies even when they change their tools, <span data-tag="ioa">IOA</span>-based detection can catch novel or modified malware that has never been seen before, simply because the behavior still looks like an attack in progress.</p>
+      <div class="callout"><b>The advantage:</b> IOAs don't need to recognize the attacker to know something is wrong — they only need to recognize the pattern of the attempt itself.</div>
+    </section>
+
+    <h2><span class="num">03</span> Why the Distinction Matters</h2>
+    <blockquote>
+      Think of <span data-tag="ioc">IOC</span> detection like a security guard checking IDs against a "banned persons" photo list — effective, but useless against someone never photographed before. <span data-tag="ioa">IOA</span> detection is like a guard who notices someone repeatedly testing locked doors and avoiding cameras — no recognition needed to know something is wrong.
+      <span class="attribution">— working analogy, SOC 101</span>
+    </blockquote>
+
+    <p>This is exactly why modern Endpoint Detection and Response (EDR) tools, such as CrowdStrike Falcon or Microsoft Defender for Endpoint, combine both approaches. <span data-tag="ioc">IOC</span> matching quickly flags known threats with very low false-positive rates, while <span data-tag="ioa">IOA</span>-based behavioral analysis catches zero-day exploits, fileless malware, and living-off-the-land attacks that never trigger a signature match.</p>
+
+    <p>A well-known real-world illustration is ransomware. By the time file-encryption <span data-tag="ioc">IOCs</span> appear, the damage is largely done. Security teams that also monitor <span data-tag="ioa">IOAs</span> — such as a process suddenly attempting mass file renames or disabling shadow copies — can sometimes intercept the attack before encryption completes, turning a catastrophic incident into a contained one.</p>
+
+    <h2><span class="num">04</span> Why This Matters for Learners</h2>
+    <p>For students and early-career professionals, the <span data-tag="ioc">IOC</span> vs. <span data-tag="ioa">IOA</span> framework is foundational because it maps directly onto the two pillars of a mature security operations center (SOC):</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <div class="k">Pillar One</div>
+        <div class="v">Threat intelligence &amp; detection engineering — building and updating IOC databases</div>
+      </div>
+      <div class="pillar">
+        <div class="k">Pillar Two</div>
+        <div class="v">Behavioral analytics &amp; threat hunting — defining and refining IOA rules</div>
+      </div>
+    </div>
+
+    <p>Understanding both equips you to think like a defender reacting to known threats <em>and</em> an analyst anticipating unknown ones — a mindset that underpins careers in SOC analysis, threat hunting, and incident response.</p>
+
+    <div class="takeaway">
+      <div class="eyebrow">Key takeaway</div>
+      <p><span class="ioc-word">IOCs</span> tell you an attack has happened. <span class="ioa-word">IOAs</span> tell you an attack is happening. Neither is sufficient alone — a resilient security posture pairs IOC matching for speed and certainty against known threats with IOA-based behavioral monitoring to catch the attacks nobody has seen before.</p>
+    </div>
+
+    <footer>Written as part of a self-learning activity on Cybersecurity Essentials.</footer>
+
+  </div>
+
+<script>
+  const btnIoc = document.getElementById('btn-ioc');
+  const btnIoa = document.getElementById('btn-ioa');
+
+  function setLens(which){
+    const body = document.body;
+    if(which === 'ioc'){
+      const active = !body.classList.contains('lens-ioc');
+      body.classList.remove('lens-ioa'); btnIoa.classList.remove('active'); btnIoa.setAttribute('aria-pressed','false');
+      body.classList.toggle('lens-ioc', active);
+      btnIoc.classList.toggle('active', active);
+      btnIoc.setAttribute('aria-pressed', String(active));
+    } else {
+      const active = !body.classList.contains('lens-ioa');
+      body.classList.remove('lens-ioc'); btnIoc.classList.remove('active'); btnIoc.setAttribute('aria-pressed','false');
+      body.classList.toggle('lens-ioa', active);
+      btnIoa.classList.toggle('active', active);
+      btnIoa.setAttribute('aria-pressed', String(active));
+    }
+  }
+
+  btnIoc.addEventListener('click', () => setLens('ioc'));
+  btnIoa.addEventListener('click', () => setLens('ioa'));
+</script>
+
+</body>
+</html>
