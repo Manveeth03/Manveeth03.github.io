@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Forensics: The Evidence That Disappears When You Pull the Plug</title>
+<style>
+  :root {
+    --ink: #1c1e26;
+    --ink-soft: #4a4e5c;
+    --paper: #faf9f6;
+    --rule: #d8d4c8;
+    --accent: #8a1f2d;
+    --accent-soft: #f4e8e6;
+    --mono: #6b6f5e;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    line-height: 1.7;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+
+  .kicker {
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .kicker::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1 {
+    font-family: 'Georgia', serif;
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+    margin: 0 0 18px;
+    color: var(--ink);
+  }
+
+  .subtitle {
+    font-size: 19px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin: 0 0 28px;
+    line-height: 1.5;
+  }
+
+  .meta {
+    font-family: 'Courier New', monospace;
+    font-size: 12.5px;
+    color: var(--mono);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 12px 0;
+    margin-bottom: 40px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  p { font-size: 17.5px; margin: 0 0 22px; color: var(--ink); }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 400;
+    margin: 46px 0 16px;
+    color: var(--ink);
+    position: relative;
+    padding-left: 18px;
+  }
+
+  h2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    background: var(--accent);
+  }
+
+  .drop-cap::first-letter {
+    font-size: 58px;
+    float: left;
+    line-height: 0.8;
+    padding: 6px 8px 0 0;
+    color: var(--accent);
+    font-family: 'Georgia', serif;
+  }
+
+  .callout {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 18px 22px;
+    margin: 32px 0;
+    font-size: 16.5px;
+    color: var(--ink);
+  }
+
+  .callout strong { color: var(--accent); }
+
+  code {
+    font-family: 'Courier New', monospace;
+    background: #eeeadf;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 15.5px;
+    color: #3d3220;
+  }
+
+  ul {
+    padding-left: 22px;
+    margin: 0 0 22px;
+  }
+
+  ul li {
+    font-size: 17.5px;
+    margin-bottom: 10px;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 48px 0;
+    color: var(--mono);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+  .divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .author-box {
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    font-family: 'Courier New', monospace;
+    font-size: 13.5px;
+    color: var(--mono);
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 30px; }
+    .wrap { padding: 40px 18px 64px; }
+    p, ul li { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">Digital Forensics — Self-Learning Article</div>
+
+  <h1>Memory Forensics: The Evidence That Disappears the Moment You Pull the Plug</h1>
+  <p class="subtitle">Why the most honest witness to a cyberattack lives in RAM, not on the hard disk — and why so many investigations still miss it.</p>
+
+  <div class="meta">
+    <span>7 MIN READ</span>
+    <span>DIGITAL FORENSICS</span>
+    <span>INCIDENT RESPONSE</span>
+  </div>
+
+  <p class="drop-cap">Ask most people what "computer forensics" looks like, and they will describe someone cloning a hard drive, opening a file browser, and quietly scrolling through deleted photos. That picture is not wrong, but it is incomplete. Disk forensics recovers what was written down. It says almost nothing about what a machine was actually <em>doing</em> at the moment an attacker was inside it. For that, investigators need a different kind of evidence — one that exists only while the machine is powered on, and vanishes the instant it is switched off. This is the territory of memory forensics, and it is quietly becoming one of the most important skills in the field.</p>
+
+  <h2>Why Disk Forensics Isn't Enough Anymore</h2>
+  <p>Modern malware has adapted specifically to defeat disk-based investigation. Fileless malware, for instance, never writes an executable to disk at all — it lives entirely inside a running process's memory space, injected through a script or a legitimate tool like PowerShell or <code>rundll32.exe</code>. Reflective DLL injection loads a malicious library directly into memory without it ever touching the file system. Credential-stealing tools like Mimikatz pull plaintext passwords straight out of the LSASS process's memory and are gone before a disk image is ever taken. If an investigator only examines the hard drive, all of this activity is invisible. The attack happened, evidence of intent and technique existed, and none of it survives to the disk layer.</p>
+
+  <div class="callout">
+    <strong>The core idea:</strong> RAM holds the "in-progress" state of a system — open network connections, decrypted data, injected code, and passwords in plaintext — none of which is ever written to disk under normal operation.
+  </div>
+
+  <h2>What Actually Lives in Volatile Memory</h2>
+  <p>A single memory capture, often just a few gigabytes, can contain an extraordinary amount of forensic gold:</p>
+  <ul>
+    <li><strong>Running and hidden processes</strong> — including processes an attacker has tried to unlink from the normal process list to evade tools like Task Manager.</li>
+    <li><strong>Network connections</strong> — active and recently closed sockets, revealing command-and-control servers even after the malware cleans up its disk footprint.</li>
+    <li><strong>Decrypted data</strong> — encryption keys and plaintext content that exist in memory before being encrypted for storage or transmission.</li>
+    <li><strong>Command history and clipboard contents</strong> — often the clearest record of exactly what an attacker typed, by hand, during a live intrusion.</li>
+    <li><strong>Injected code and shellcode</strong> — memory regions with execute permissions that don't correspond to any legitimate loaded module.</li>
+  </ul>
+
+  <h2>How the Capture Actually Happens</h2>
+  <p>The first rule of memory forensics is one every student learns early: order of volatility. RAM must be captured before the disk is imaged, because RAM is, by definition, the most fragile piece of evidence at a scene. Tools like Magnet RAM Capture, WinPMEM, or FTK Imager's memory capture module create a raw binary dump of everything currently held in physical memory. On Linux systems, LiME (Linux Memory Extractor) performs the same role as a loadable kernel module.</p>
+  <p>The catch is that this capture process is inherently invasive. Simply running the acquisition tool changes the very memory it is trying to preserve — the tool itself must load into RAM to do its job. A skilled forensic analyst documents this limitation rather than hiding it, and chooses tools with the smallest possible memory footprint to minimize contamination of the evidence.</p>
+
+  <div class="divider">ANALYSIS</div>
+
+  <h2>Making Sense of a Raw Memory Dump</h2>
+  <p>A raw memory image, on its own, is just billions of bytes with no built-in structure — there is no file table to browse. This is where the Volatility Framework, the de facto standard open-source tool in this field, becomes essential. Volatility works by understanding the internal data structures of a given operating system's kernel, allowing it to reconstruct meaning from what looks like noise.</p>
+  <p>A typical Volatility workflow starts with identifying the correct OS profile, then moves through a sequence of plugins: <code>pslist</code> and <code>psscan</code> to enumerate processes (the second catching ones the first misses through evasion), <code>netscan</code> for network artifacts, <code>malfind</code> to flag memory regions bearing the signatures of code injection, and <code>hashdump</code> to extract password hashes directly from the memory-resident registry hives. Each plugin peels back one more layer of what the machine was doing in its final moments of operation.</p>
+
+  <h2>A Skill Worth Building Early</h2>
+  <p>What makes memory forensics genuinely valuable to learn — beyond ticking a syllabus box — is that it sits at the intersection of operating systems, incident response, and malware analysis. Understanding how a process table is linked in the Windows kernel, or how the LSASS process handles credentials, forces a level of systems-level thinking that most cybersecurity coursework only gestures at. It is also one of the clearest examples of a broader forensic principle: evidence quality depends entirely on when and how you choose to look. Wait too long, and the most revealing artifacts in the entire investigation are gone the moment the power light goes dark.</p>
+
+  <p>For students starting out, the practical path is straightforward: capture a memory image from a test virtual machine using one of the free acquisition tools mentioned above, and walk through the basic Volatility plugins against it. There's a meaningful difference between reading about "in-memory artifacts" in a slide deck and watching a hidden process, a stolen password hash, or an injected shellcode region surface directly from a wall of raw hex. That difference is where the subject actually clicks.</p>
+
+  <div class="author-box">
+    Written as a self-learning activity for the Digital Forensic Analyst Hands-on Certification (NSQF Level 6).
+  </div>
+
+</div>
+</body>
+</html>
