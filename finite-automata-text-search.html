@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applications of Finite Automata in Text Search and Pattern Matching</title>
+<style>
+  :root {
+    --ink: #1c2430;
+    --muted: #5b6b7c;
+    --accent: #2456a6;
+    --accent-light: #e8f0fb;
+    --border: #d8e0e8;
+    --code-bg: #0f1620;
+    --code-text: #d8e6ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #f4f6f9;
+    font-family: "Georgia", "Cambria", "Times New Roman", serif;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+  .page {
+    max-width: 860px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 56px 64px;
+    box-shadow: 0 2px 18px rgba(20, 30, 50, 0.08);
+    border-radius: 4px;
+  }
+  header.title-block {
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+  }
+  .eyebrow {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-size: 30px;
+    margin: 0 0 12px 0;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .subtitle {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0;
+  }
+  h2 {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 20px;
+    color: var(--accent);
+    margin-top: 40px;
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    color: var(--ink);
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+  p { margin: 0 0 14px 0; font-size: 16px; }
+  ul, ol { margin: 0 0 16px 0; padding-left: 24px; }
+  li { margin-bottom: 6px; font-size: 16px; }
+  .callout {
+    background: var(--accent-light);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    margin: 20px 0;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 14.5px;
+    color: #2a3b52;
+    border-radius: 2px;
+  }
+  .diagram-box {
+    background: #fbfcfe;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    margin: 22px 0;
+    text-align: center;
+  }
+  .diagram-caption {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  code {
+    background: #eef1f5;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: "Consolas", "Menlo", monospace;
+    font-size: 14px;
+    color: #b3372b;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 16px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: "Consolas", "Menlo", monospace;
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin: 18px 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 14.5px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: left;
+  }
+  th {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 700;
+  }
+  tr:nth-child(even) td { background: #fafbfd; }
+  footer {
+    margin-top: 44px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .refs li { font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="title-block">
+    <div class="eyebrow">Theory of Computation &middot; Compiler Design</div>
+    <h1>Applications of Finite Automata in Text Search and Pattern Matching</h1>
+    <p class="subtitle">A self-study article on how a foundational automaton theory concept powers everyday software</p>
+  </header>
+
+  <h2>Introduction</h2>
+  <p>
+    Finite Automata (FA) are among the simplest computational models studied in the Theory of Computation,
+    yet they quietly run inside some of the most widely used software tools in the world. A finite automaton
+    is an abstract machine with a finite number of states, a set of input symbols, and transition rules that
+    move it from one state to another as it reads input, one symbol at a time. Despite this simplicity,
+    finite automata form the mathematical backbone of lexical analysis in compilers, text editors, network
+    security tools, and search engines. This article explains the core concepts of finite automata, connects
+    them to regular expressions, and explores their real-life applications in text search and pattern matching.
+  </p>
+
+  <h2>Core Concepts</h2>
+  <p>
+    A finite automaton is formally defined as a 5-tuple: <code>(Q, &Sigma;, &delta;, q0, F)</code>, where
+    <code>Q</code> is a finite set of states, <code>&Sigma;</code> is the input alphabet, <code>&delta;</code>
+    is the transition function, <code>q0</code> is the start state, and <code>F</code> is the set of
+    accepting (final) states. There are two common variants:
+  </p>
+  <ul>
+    <li><strong>Deterministic Finite Automaton (DFA):</strong> for each state and input symbol, there is
+      exactly one next state, making execution fast and predictable.</li>
+    <li><strong>Non-deterministic Finite Automaton (NFA):</strong> a state may have multiple possible
+      transitions (or none) for a given symbol, which is easier to construct but must be simulated or
+      converted to a DFA before efficient execution.</li>
+  </ul>
+  <p>
+    Every regular expression can be systematically converted into an NFA (via Thompson's Construction) and
+    then into an equivalent DFA (via the Subset Construction algorithm). This equivalence between regular
+    expressions and finite automata is what allows pattern-matching tools to accept a human-readable pattern
+    and execute it as a fast, table-driven state machine.
+  </p>
+
+  <div class="diagram-box">
+    <svg viewBox="0 0 560 180" width="100%" height="180" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L9,3 z" fill="#2456a6"/>
+        </marker>
+      </defs>
+      <!-- start arrow -->
+      <line x1="10" y1="90" x2="45" y2="90" stroke="#2456a6" stroke-width="2" marker-end="url(#arrow)"/>
+      <!-- q0 -->
+      <circle cx="70" cy="90" r="28" fill="#e8f0fb" stroke="#2456a6" stroke-width="2"/>
+      <text x="70" y="95" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#1c2430">q0</text>
+      <!-- q1 -->
+      <circle cx="230" cy="90" r="28" fill="#e8f0fb" stroke="#2456a6" stroke-width="2"/>
+      <text x="230" y="95" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#1c2430">q1</text>
+      <!-- q2 final, double circle -->
+      <circle cx="400" cy="90" r="28" fill="#e8f0fb" stroke="#2456a6" stroke-width="2"/>
+      <circle cx="400" cy="90" r="22" fill="none" stroke="#2456a6" stroke-width="1.5"/>
+      <text x="400" y="95" text-anchor="middle" font-family="Helvetica" font-size="14" fill="#1c2430">q2</text>
+      <!-- transitions -->
+      <line x1="98" y1="90" x2="202" y2="90" stroke="#2456a6" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="150" y="80" text-anchor="middle" font-family="Helvetica" font-size="13" fill="#5b6b7c">a</text>
+      <line x1="258" y1="90" x2="372" y2="90" stroke="#2456a6" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="315" y="80" text-anchor="middle" font-family="Helvetica" font-size="13" fill="#5b6b7c">b</text>
+      <!-- self loop on q0 -->
+      <path d="M55,65 C45,35 95,35 85,65" fill="none" stroke="#2456a6" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="70" y="30" text-anchor="middle" font-family="Helvetica" font-size="13" fill="#5b6b7c">a, b</text>
+      <!-- self loop on q2 -->
+      <path d="M385,65 C375,35 425,35 415,65" fill="none" stroke="#2456a6" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="400" y="30" text-anchor="middle" font-family="Helvetica" font-size="13" fill="#5b6b7c">a, b</text>
+    </svg>
+    <div class="diagram-caption">
+      Fig. 1 — DFA accepting strings that contain the substring "ab". States are circles, the double circle
+      (q2) marks the accepting state, and labelled arrows show transitions on each input symbol.
+    </div>
+  </div>
+
+  <h2>From Regular Expressions to Working Machines</h2>
+  <p>
+    Regular expressions such as <code>ab*c</code> or <code>[a-z]+@[a-z]+\.com</code> are the notation
+    programmers actually write. Underneath, tools like <code>grep</code>, text editors, and compiler lexers
+    translate that expression into a DFA and then scan the input string exactly once, character by character,
+    moving between states. Because a DFA lookup is a constant-time table access, matching runs in
+    <code>O(n)</code> time for input of length <code>n</code>, which is why automaton-based search remains
+    fast even on very large files.
+  </p>
+  <pre>Pattern:  a b*  c
+Input:    a b b b c
+
+State walk:
+q0 --a--> q1 --b--> q1 --b--> q1 --b--> q1 --c--> q2 (accept)</pre>
+
+  <h2>Real-Life Applications</h2>
+  <table>
+    <tr><th>Domain</th><th>How Finite Automata Are Used</th></tr>
+    <tr><td>Compiler Design</td><td>The lexical analyzer (scanner) uses a DFA to break source code into tokens such as identifiers, keywords, and operators.</td></tr>
+    <tr><td>Text Editors &amp; grep</td><td>Search-and-replace and command-line tools like <code>grep</code>, <code>sed</code>, and <code>awk</code> compile regular expressions into automata for fast substring search.</td></tr>
+    <tr><td>Network Security</td><td>Intrusion Detection Systems (e.g., Snort) match packet payloads against attack signatures using automaton-based pattern matching.</td></tr>
+    <tr><td>Bioinformatics</td><td>DNA and protein sequence search tools scan genetic strings for motifs using finite-state pattern matchers.</td></tr>
+    <tr><td>Spam &amp; Input Filters</td><td>Email systems and web forms validate formats (emails, phone numbers) using regular-expression-driven automata.</td></tr>
+    <tr><td>Search Engines</td><td>Autocomplete and typo-tolerant search use automaton structures to match query prefixes efficiently.</td></tr>
+  </table>
+
+  <div class="callout">
+    <strong>Why it matters:</strong> Finite automata guarantee predictable, linear-time performance and low
+    memory use, which is essential when scanning gigabytes of source code, log files, or genomic data where
+    slower matching algorithms would be impractical.
+  </div>
+
+  <h2>Importance in Computer Science</h2>
+  <p>
+    Finite automata sit at the base of the Chomsky hierarchy, modelling exactly the class of regular
+    languages. Their importance in computer science comes from three properties working together:
+    simplicity of implementation, provable correctness (every DFA can be minimized to the smallest
+    equivalent machine), and speed. This combination is why automata theory, though decades old, is still
+    the first tool reached for whenever software needs to recognize patterns in a stream of symbols — whether
+    that stream is source code, network traffic, or DNA. Studying finite automata also builds the conceptual
+    foundation needed for more powerful models such as pushdown automata (used in parsing) and Turing
+    machines (used in general computation), making it a natural starting point in any compiler design or
+    automata theory course.
+  </p>
+
+  <h2>Conclusion</h2>
+  <p>
+    Finite automata demonstrate how a simple mathematical model — a handful of states and transitions — can
+    scale into infrastructure that supports compilers, security systems, and search engines used by billions
+    of people daily. Understanding this connection between regular expressions and finite-state machines is
+    a core skill in computer science, bridging theoretical automata theory with the practical engineering of
+    fast, reliable software.
+  </p>
+
+  <footer>
+    <p class="refs" style="margin:0;">
+      References: Hopcroft, Motwani &amp; Ullman, <em>Introduction to Automata Theory, Languages, and
+      Computation</em>; Aho, Lam, Sethi &amp; Ullman, <em>Compilers: Principles, Techniques, and Tools</em>
+      (the "Dragon Book").
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
